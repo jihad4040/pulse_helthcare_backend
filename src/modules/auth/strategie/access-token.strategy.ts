@@ -35,12 +35,6 @@ export class AtStrategy extends PassportStrategy(JwtStrategy, "jwt") {
             throw new UnauthorizedException("User not found");
         }
 
-        if (user.role === "ELEVATOR" && user.verifidStatus === "REQUEST") {
-            throw new BadRequestException(
-                "You are not approved. Please contact admin"
-            );
-        }
-
         if (user.verifidStatus === "SUSPEND") {
             throw new UnauthorizedException("Account suspended");
         }
