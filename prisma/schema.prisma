@@ -16,6 +16,9 @@ model User {
   profile        String?
   otp            String?
   refreshToken   String?
+  creadientials  String?
+  status         status        @default(PENDING)
+  credentials    Createntials  @default(CREDENTIALS)
   isNotification Boolean       @default(true)
   isAgree        Boolean       @default(false)
   isOnboarded    Boolean       @default(false)
@@ -24,13 +27,53 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  logTemperature LogTemperature[]
+
+  @@index([userId])
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([status])
+  @@index([verifidStatus])
   @@map("users")
+}
+
+model LogTemperature {
+  temperatureId String   @id @default(uuid())
+  date          DateTime
+  temperature   Decimal  @db.Decimal(4, 1)
+  isFahrenheit  Boolean  @default(true)
+  timeMeasured  String?  @default("")
+  note          String?  @default("")
+  quickTag      String[] @default([])
+  userId        String
+
+  users User @relation(fields: [userId], references: [userId])
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([temperatureId])
 }
 
 enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+}
+
+enum status {
+  SUSPEND
+  INACTIVE
+  ACTIVE
+  PENDING
+}
+
+enum Createntials {
+  GOOGLE
+  CREDENTIALS
+  APPLE
 }
 
 enum verifidStatus {
