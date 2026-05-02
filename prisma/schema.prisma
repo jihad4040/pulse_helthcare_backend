@@ -28,6 +28,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   logTemperature LogTemperature[]
+  onbording      Onbording?
 
   @@index([userId])
   @@index([email])
@@ -55,6 +56,23 @@ model LogTemperature {
 
   @@index([userId])
   @@index([temperatureId])
+}
+
+model Onbording {
+  onbordingId String @id @default(uuid())
+  userId      String @unique
+  name        String
+  email       String
+  lifeStage   String
+  whereFrom   String
+  helthData   Json
+
+  users User @relation(fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@index([onbordingId])
+  @@index([email])
+  @@index([name])
 }
 
 enum Role {

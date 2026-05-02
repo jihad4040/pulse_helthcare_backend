@@ -14,6 +14,7 @@ import { MessageModule } from './modules/message/message.module';
 import { GroupCategoryModule } from './modules/group-category/group-category.module';
 import { FindPertnerModule } from './modules/find-pertner/find-pertner.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { OnbordingModule } from './modules/onbording/onbording.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -33,7 +34,8 @@ import envConfig from './config/env.config';
     MessageModule,
     GroupCategoryModule,
     FindPertnerModule,
-    PaymentModule
+    PaymentModule,
+    OnbordingModule
   ],
   controllers: [AppController],
   providers: [AppService],
