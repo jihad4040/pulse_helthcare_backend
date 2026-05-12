@@ -13,4 +13,16 @@ export class UserController {
     return this.userService.getUserOnbordingAndLogtemperatureForAi(userId);
   }
 
+
+  @Get('lon-temperature-report/:userId')
+  async logTemperature(@Param('userId') userId: string) {
+    const result =
+      await this.userService.last30DaysTemperatureReport(userId);
+
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
 }
