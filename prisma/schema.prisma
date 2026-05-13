@@ -34,6 +34,7 @@ model User {
   sentMessages     PartnerMessage[] @relation("SentMessages")
   receivedMessages PartnerMessage[] @relation("ReceivedMessages")
   postReactions    PostReaction[]
+  groups           Group[]
 
   @@index([userId])
   @@index([email])
@@ -82,6 +83,7 @@ model Onbording {
 
 model Group {
   groupId           String        @id @default(uuid())
+  userId            String
   groupName         String
   description       String?
   isPublic          Boolean       @default(true)
@@ -93,6 +95,7 @@ model Group {
   groupPosts        GroupPost[]
 
   groupCategory GroupCategory @relation(fields: [groupCategoryId], references: [groupCategoryId], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@index([groupId])
   @@index([groupName])

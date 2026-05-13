@@ -14,21 +14,22 @@ import {
 import { GroupCategoryService } from './group-category.service';
 import { CreateGroupCategoryDto } from './dto/create-group-category.dto';
 import { UpdateGroupCategoryDto } from './dto/update-group-category.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Group Category')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SUPER_ADMIN')
 @Controller('group-category')
 export class GroupCategoryController {
-  constructor(private readonly groupCategoryService: GroupCategoryService) {}
+  constructor(private readonly groupCategoryService: GroupCategoryService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Create a new group category (Only for Admin)' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('icon'))
   async create(
@@ -44,6 +45,7 @@ export class GroupCategoryController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all group categories' })
   async findAll() {
     const result = await this.groupCategoryService.findAll();
     return {
@@ -53,6 +55,7 @@ export class GroupCategoryController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a group category by ID' })
   async findOne(@Param('id') id: string) {
     const result = await this.groupCategoryService.findOne(id);
     return {
@@ -62,6 +65,10 @@ export class GroupCategoryController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Update a group category by ID (Only for Admin)' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('icon'))
   async update(
@@ -69,7 +76,12 @@ export class GroupCategoryController {
     @Body() updateGroupCategoryDto: UpdateGroupCategoryDto,
     @UploadedFile() file?: any,
   ) {
-    const result = await this.groupCategoryService.update(id, updateGroupCategoryDto, file);
+    const result = await this.groupCategoryService.update(
+      id,
+      updateGroupCategoryDto,
+      file,
+    );
+
     return {
       success: true,
       message: 'Category updated successfully',
@@ -78,6 +90,10 @@ export class GroupCategoryController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Delete a group category by ID (Only for Admin)' })
   async remove(@Param('id') id: string) {
     await this.groupCategoryService.remove(id);
     return {

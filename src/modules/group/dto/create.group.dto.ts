@@ -1,8 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateGroup {
+export class CreateGroupDto {
   @ApiProperty({ example: 'Enter your group name' })
   @IsString()
   @IsNotEmpty()
@@ -22,8 +22,42 @@ export class CreateGroup {
   @Type(() => Boolean)
   isPublic!: boolean;
 
-  @ApiProperty({ example: 'Enter the group category' })
+  @ApiProperty({ example: 'Enter the group category ID' })
   @IsString()
   @IsNotEmpty()
-  grocategoryId!: string;
+  groupCategoryId!: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', description: 'Group cover picture' })
+  @IsOptional()
+  groupCoverPicture?: any;
+}
+
+export class UpdateGroupDto {
+  @ApiPropertyOptional({ example: 'Updated group name' })
+  @IsString()
+  @IsOptional()
+  groupName?: string;
+
+  @ApiPropertyOptional({ example: 'Updated description' })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  isPublic?: boolean;
+
+  @ApiPropertyOptional({ example: 'Updated group category ID' })
+  @IsString()
+  @IsOptional()
+  groupCategoryId?: string;
+
+  @ApiPropertyOptional({ type: 'string', format: 'binary', description: 'Group cover picture' })
+  @IsOptional()
+  groupCoverPicture?: any;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 // Multer type fixed
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -38,15 +38,35 @@ export class GroupCategoryService {
         });
     }
 
-    async update(id: string, updateGroupCategoryDto: { name?: string }, file?: any) {
-        const updateData: any = { ...updateGroupCategoryDto };
+    async update(
+        id: string,
+        updateGroupCategoryDto: { name?: string },
+        file?: any,
+    ) {
+        const existingCategory = await this.findOne(id);
 
-        if (file) {
+        if (!existingCategory) {
+            throw new NotFoundException('Category not found');
+        }
+
+        const updateData: any = {
+            name : existingCategory.name, // Default to existing name
+            icon : existingCategory.icon, // Default to existing icon
+        };
+
+        // Only update name if provided
+        if (updateGroupCategoryDto.name) {
+            updateData.name = updateGroupCategoryDto.name;
+        }
+
+        // Only update icon if file exists
+        if (file && file.buffer) {
             const uploadResult: any = await this.cloudinary.uploadImageFromBuffer(
                 file.buffer,
                 'group-categories',
                 `${Date.now()}-${file.originalname}`,
             );
+
             updateData.icon = uploadResult.secure_url;
         }
 
