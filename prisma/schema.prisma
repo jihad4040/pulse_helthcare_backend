@@ -27,8 +27,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  logTemperature LogTemperature[]
-  onbording      Onbording?
+  logTemperature   LogTemperature[]
+  onbording        Onbording?
+  groupMembers     GroupMember[]
+  groupPosts       GroupPost[]
+  sentMessages     PartnerMessage[] @relation("SentMessages")
+  receivedMessages PartnerMessage[] @relation("ReceivedMessages")
+  postReactions    PostReaction[]
 
   @@index([userId])
   @@index([email])
@@ -49,7 +54,7 @@ model LogTemperature {
   quickTag      String[] @default([])
   userId        String
 
-  users User @relation(fields: [userId], references: [userId])
+  users User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -67,12 +72,116 @@ model Onbording {
   whereFrom   String
   helthData   Json
 
-  users User @relation(fields: [userId], references: [userId])
+  users User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
   @@index([userId])
   @@index([onbordingId])
   @@index([email])
   @@index([name])
+}
+
+model Group {
+  groupId           String        @id @default(uuid())
+  groupName         String
+  description       String?
+  isPublic          Boolean       @default(true)
+  groupCategoryId   String
+  groupCoverPicture String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  groupMembers      GroupMember[]
+  groupPosts        GroupPost[]
+
+  groupCategory GroupCategory @relation(fields: [groupCategoryId], references: [groupCategoryId], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([groupName])
+  @@map("groups")
+}
+
+model GroupCategory {
+  groupCategoryId String   @id @default(uuid())
+  name            String
+  icon            String
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  groups Group[]
+
+  @@index([groupCategoryId])
+  @@index([name])
+  @@index([isDeleted])
+  @@map("group_categories")
+}
+
+model GroupMember {
+  groupMemberId String   @id @default(uuid())
+  groupId       String
+  userId        String
+  group         Group    @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([groupMemberId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+model GroupPost {
+  groupPostId   String         @id @default(uuid())
+  groupId       String
+  userId        String
+  text          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  group         Group          @relation(fields: [groupId], references: [groupId], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  postReactions PostReaction[]
+
+  @@index([groupPostId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_posts")
+}
+
+model PartnerMessage {
+  partnerMessageId String   @id @default(uuid())
+  text             String
+  senderId         String
+  receiverId       String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  sender           User     @relation("SentMessages", fields: [senderId], references: [userId], onDelete: Cascade)
+  receiver         User     @relation("ReceivedMessages", fields: [receiverId], references: [userId], onDelete: Cascade)
+
+  @@index([partnerMessageId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@map("partner_messages")
+}
+
+model PostReaction {
+  postReactionId String       @id @default(uuid())
+  groupPostId    String
+  userId         String
+  reaction       ReactionType
+  groupPost      GroupPost    @relation(fields: [groupPostId], references: [groupPostId], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([postReactionId])
+  @@index([groupPostId])
+  @@index([userId])
+  @@map("post_reactions")
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
 }
 
 enum Role {
