@@ -81,12 +81,18 @@ export class GroupService {
           select: { name: true, profile: true, userId: true }
         },
         groupCategory: true,
+        groupPosts: {
+        take: 1,
+        orderBy: {
+          createdAt: 'desc' // newest post first
+        }
+      },
         _count: {
           select: {
             groupMembers: true,
             groupPosts: true
           }
-        }
+        },
       }
     });
   }
@@ -98,6 +104,12 @@ export class GroupService {
         user: {
           select: { name: true, profile: true },
         },
+        groupPosts: {
+        take: 1,
+        orderBy: {
+          createdAt: 'desc' // newest post first
+        }
+      },
         _count: {
           select: { groupMembers: true, groupPosts: true },
         },
