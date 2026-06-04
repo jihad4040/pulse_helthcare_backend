@@ -16,6 +16,7 @@ import { FindPertnerModule } from './modules/find-pertner/find-pertner.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { OnbordingModule } from './modules/onbording/onbording.module';
 import { MatchPertnerModule } from './modules/match-pertner/match-pertner.module';
+import { AdminDashboardModule } from './modules/admin-dashboard/admin-dashboard.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -37,7 +38,8 @@ import envConfig from './config/env.config';
     FindPertnerModule,
     PaymentModule,
     OnbordingModule,
-    MatchPertnerModule
+    MatchPertnerModule,
+    AdminDashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
