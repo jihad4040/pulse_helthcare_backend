@@ -8,6 +8,8 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserSignUpDto } from './dto/user.singup.dto';
 import { ERROR_MESSAGES } from 'src/common/constants';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -177,5 +179,53 @@ export class AuthService {
     return {
       message: 'Logout successful',
     };
+  }
+
+  async updateProfile(userId: string, data: UpdateProfileDto) {
+    const user = await this.prisma.user.update({
+      where: { userId },
+      data: {
+        name: data.name,
+        age: data.age,
+      },
+      select: {
+        userId: true,
+        name: true,
+        email: true,
+        phone: true,
+        age: true,
+        profile: true,
+        role: true,
+      },
+    });
+
+    return user;
+  }
+
+  async changePassword(userId: string, data: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER.USER_NOT_FOUND);
+    }
+
+    const isPasswordValid = await bcrypt.compare(data.oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Incorrect old password');
+    }
+
+    const hashedNewPassword = await this.hast(data.newPassword);
+
+    await this.prisma.user.update({
+      where: { userId },
+      data: {
+        password: hashedNewPassword,
+      },
+    });
+
+    return { message: 'Password changed successfully' };
   }
 }
