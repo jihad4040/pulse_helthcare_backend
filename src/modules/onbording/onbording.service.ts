@@ -31,4 +31,19 @@ export class OnbordingService {
 
     return result;
   }
+
+  async getOnbording(userId: string) {
+    const findOnbording = await this.prisma.onbording.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!findOnbording) {
+      throw new NotFoundException('Your onbording not found');
+    }
+
+    return findOnbording;
+  }
+
 }

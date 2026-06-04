@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { OnbordingService } from './onbording.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -23,5 +23,19 @@ export class OnbordingController {
       message: 'Onbording Submited success',
       data: result,
     };
+  };
+
+
+  @Get('get-onbording')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getOnbording(@GetCurrentUser('userId') userId: string) {
+    const result = await this.onbordingService.getOnbording(userId);
+
+     return {
+      success: true,
+      message: 'Onbording data retrieved successfully',
+      data: result,
+    }
   }
 }
