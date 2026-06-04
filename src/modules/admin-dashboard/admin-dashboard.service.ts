@@ -78,6 +78,20 @@ export class AdminDashboardService {
         }
 
 
+        const age18to24Count = await this.prisma.user.count({ where: { age: { gte: 18, lte: 24 } } });
+        const age25to34Count = await this.prisma.user.count({ where: { age: { gte: 25, lte: 34 } } });
+        const age35to44Count = await this.prisma.user.count({ where: { age: { gte: 35, lte: 44 } } });
+        const age45PlusCount = await this.prisma.user.count({ where: { age: { gte: 45 } } });
+
+        const totalUsersWithAge = age18to24Count + age25to34Count + age35to44Count + age45PlusCount;
+
+        const ageDemographics = [
+            { label: "Age 18-24", percentage: totalUsersWithAge > 0 ? parseFloat(((age18to24Count / totalUsersWithAge) * 100).toFixed(2)) : 0 },
+            { label: "Age 25-34", percentage: totalUsersWithAge > 0 ? parseFloat(((age25to34Count / totalUsersWithAge) * 100).toFixed(2)) : 0 },
+            { label: "Age 35-44", percentage: totalUsersWithAge > 0 ? parseFloat(((age35to44Count / totalUsersWithAge) * 100).toFixed(2)) : 0 },
+            { label: "Age 45+", percentage: totalUsersWithAge > 0 ? parseFloat(((age45PlusCount / totalUsersWithAge) * 100).toFixed(2)) : 0 },
+        ];
+
         return {
             totalUser,
             totalGroup,
@@ -86,7 +100,8 @@ export class AdminDashboardService {
             totalInactiveUser,
             totalSuspendUser,
             totalPendingUser,
-            last12MonthsGrowth
+            last12MonthsGrowth,
+            ageDemographics
         }
     }
 
@@ -228,6 +243,44 @@ export class AdminDashboardService {
             recentPosts,
             recentMembers,
             last5DaysActivity
+        };
+    }
+
+    async getAllUsers(page: number = 1, limit: number = 10) {
+        const skip = (page - 1) * limit;
+
+        const [data, total] = await Promise.all([
+            this.prisma.user.findMany({
+                skip,
+                take: limit,
+                select: {
+                    userId: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    role: true,
+                    profile: true,
+                    status: true,
+                    verifidStatus: true,
+                    isOnboarded: true,
+                    createdAt: true,
+                    updatedAt: true
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            }),
+            this.prisma.user.count()
+        ]);
+
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            }
         };
     }
 }
