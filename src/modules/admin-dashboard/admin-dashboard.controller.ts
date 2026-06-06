@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { status } from '@prisma/client';
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
+import { NotificationService } from '../notification/notification.service';
+import { SendNotificationDto } from './dto/send-notification.dto';
 
 
 @ApiBearerAuth()
@@ -12,7 +14,10 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 @Roles('ADMIN')
 @Controller('admin-dashboard')
 export class AdminDashboardController {
-  constructor(private readonly adminDashboardService: AdminDashboardService) { }
+  constructor(
+    private readonly adminDashboardService: AdminDashboardService,
+    private readonly notificationService: NotificationService
+  ) { }
 
   @Get('admin-overview')
   @ApiOperation({ summary: 'Get admin overview (Only For Admin)' })
@@ -57,5 +62,15 @@ export class AdminDashboardController {
     return this.adminDashboardService.getAllUsers(Number(page), Number(limit));
   }
 
+  @Post('send-notification')
+  @ApiOperation({ summary: 'Send a push notification to all users (Only For Admin)' })
+  async sendNotificationToAll(@Body() data: SendNotificationDto) {
+    const result = await this.notificationService.sendToAllUsers(data.title, data.body, data.data);
+    return {
+      success: true,
+      message: 'Notification sent successfully to all users',
+      data: result,
+    };
+  }
 }
 

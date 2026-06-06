@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateGroupPostDto } from './dto/create-group-post.dto';
 import { PostReactionDto } from './dto/post-reaction.dto';
+import { CreatePostCommentDto } from './dto/create-post-comment.dto';
+import { CommentReactionDto } from './dto/comment-reaction.dto';
 
 @Injectable()
 export class GroupPostService {
@@ -87,6 +89,7 @@ export class GroupPostService {
           _count: {
             select: {
               postReactions: true,
+              postComments: true,
             },
           },
         },
@@ -151,6 +154,109 @@ export class GroupPostService {
 
     return this.prisma.postReaction.delete({
       where: { postReactionId: reaction.postReactionId },
+    });
+  }
+
+  async addComment(userId: string, groupPostId: string, data: CreatePostCommentDto) {
+    const post = await this.prisma.groupPost.findUnique({
+      where: { groupPostId },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (data.parentId) {
+      const parentComment = await this.prisma.postComment.findUnique({
+        where: { commentId: data.parentId },
+      });
+      if (!parentComment) {
+        throw new NotFoundException('Parent comment not found');
+      }
+    }
+
+    return this.prisma.postComment.create({
+      data: {
+        text: data.text,
+        userId,
+        groupPostId,
+        parentId: data.parentId || null,
+      },
+      include: {
+        user: {
+          select: { userId: true, name: true, profile: true },
+        },
+      },
+    });
+  }
+
+  async getComments(groupPostId: string, currentUserId: string) {
+    return this.prisma.postComment.findMany({
+      where: { 
+        groupPostId,
+        parentId: null 
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { userId: true, name: true, profile: true } },
+        _count: { select: { commentReactions: true, replies: true } },
+        commentReactions: {
+          where: { userId: currentUserId },
+          select: { reactionId: true, reaction: true },
+        },
+        replies: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            user: { select: { userId: true, name: true, profile: true } },
+            _count: { select: { commentReactions: true } },
+            commentReactions: {
+              where: { userId: currentUserId },
+              select: { reactionId: true, reaction: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async toggleCommentReaction(userId: string, commentId: string, data: CommentReactionDto) {
+    const comment = await this.prisma.postComment.findUnique({
+      where: { commentId },
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    const existingReaction = await this.prisma.commentReaction.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId,
+        },
+      },
+    });
+
+    if (existingReaction) {
+      if (existingReaction.reaction === data.reaction) {
+        await this.prisma.commentReaction.delete({
+          where: { reactionId: existingReaction.reactionId },
+        });
+        return { message: 'Reaction removed' };
+      } else {
+        return this.prisma.commentReaction.update({
+          where: { reactionId: existingReaction.reactionId },
+          data: { reaction: data.reaction },
+        });
+      }
+    }
+
+    return this.prisma.commentReaction.create({
+      data: {
+        commentId,
+        userId,
+        reaction: data.reaction,
+      },
     });
   }
 }

@@ -1,0 +1,39 @@
+services:
+  api:
+    image: mahdijihad001/pulse_healthcare_api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse_healthcare_api
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    # If you want to use a local postgres db, uncomment the database service below 
+    # and update the DATABASE_URL in your .env file to: 
+    # DATABASE_URL="postgresql://postgres:postgres_password@db:5432/pulse_healthcare?schema=public"
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+
+#   db:
+#     image: postgres:15-alpine
+#     container_name: pulse_healthcare_db
+#     restart: always
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: postgres_password
+#       POSTGRES_DB: pulse_healthcare
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U postgres -d pulse_healthcare"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+# volumes:
+#   pgdata:

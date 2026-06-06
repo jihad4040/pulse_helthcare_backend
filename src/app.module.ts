@@ -17,6 +17,7 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { OnbordingModule } from './modules/onbording/onbording.module';
 import { MatchPertnerModule } from './modules/match-pertner/match-pertner.module';
 import { AdminDashboardModule } from './modules/admin-dashboard/admin-dashboard.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -39,7 +40,8 @@ import envConfig from './config/env.config';
     PaymentModule,
     OnbordingModule,
     MatchPertnerModule,
-    AdminDashboardModule
+    AdminDashboardModule,
+    NotificationModule
   ],
   controllers: [AppController],
   providers: [AppService],
