@@ -7,24 +7,24 @@ datasource db {
 }
 
 model User {
-  userId         String        @id @default(uuid())
+  userId         String         @id @default(uuid())
   name           String
-  email          String        @unique
-  phone          String?       @unique
+  email          String         @unique
+  phone          String?        @unique
   password       String
-  role           Role          @default(USER)
+  role           Role           @default(USER)
   profile        String?
   age            Int?
   otp            String?
   refreshToken   String?
   creadientials  String?
   fcmToken       String?
-  status         status        @default(PENDING)
-  credentials    Createntials[]  @default([CREDENTIALS])
-  isNotification Boolean       @default(true)
-  isAgree        Boolean       @default(false)
-  isOnboarded    Boolean       @default(false)
-  verifidStatus  verifidStatus @default(PENDING)
+  status         status         @default(PENDING)
+  credentials    Createntials[] @default([CREDENTIALS])
+  isNotification Boolean        @default(true)
+  isAgree        Boolean        @default(false)
+  isOnboarded    Boolean        @default(false)
+  verifidStatus  verifidStatus  @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,8 +33,8 @@ model User {
   onbording        Onbording?
   groupMembers     GroupMember[]
   groupPosts       GroupPost[]
-  sentMessages     PartnerMessage[] @relation("SentMessages")
-  receivedMessages PartnerMessage[] @relation("ReceivedMessages")
+  sentMessages     PartnerMessage[]  @relation("SentMessages")
+  receivedMessages PartnerMessage[]  @relation("ReceivedMessages")
   postReactions    PostReaction[]
   postComments     PostComment[]
   commentReactions CommentReaction[]
@@ -236,18 +236,18 @@ model Notification {
 }
 
 model PostComment {
-  commentId       String            @id @default(uuid())
-  text            String
-  userId          String
-  groupPostId     String
-  parentId        String?           
-  parent          PostComment?      @relation("CommentReplies", fields: [parentId], references: [commentId], onDelete: Cascade)
-  replies         PostComment[]     @relation("CommentReplies")
-  user            User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  groupPost       GroupPost         @relation(fields: [groupPostId], references: [groupPostId], onDelete: Cascade)
+  commentId        String            @id @default(uuid())
+  text             String
+  userId           String
+  groupPostId      String
+  parentId         String?
+  parent           PostComment?      @relation("CommentReplies", fields: [parentId], references: [commentId], onDelete: Cascade)
+  replies          PostComment[]     @relation("CommentReplies")
+  user             User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  groupPost        GroupPost         @relation(fields: [groupPostId], references: [groupPostId], onDelete: Cascade)
   commentReactions CommentReaction[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   @@index([userId])
   @@index([groupPostId])
